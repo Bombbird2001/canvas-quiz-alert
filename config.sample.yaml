@@ -1,0 +1,12 @@
+alert_sound_file: alert.mp3
+canvas_access_token: <YOUR CANVAS ACCOUNT ACCESS TOKEN>
+canvas_link: <URL TO CANVAS>
+close_advance_min: 2
+courses:
+# Run get_course_id.py to automatically populate this section
+- id: <COURSE ID>
+  name: <COURSE NAME>
+- id: <COURSE ID>
+  name: <COURSE NAME>
+open_advance_min: 5
+display_timezone: Asia/Singapore
