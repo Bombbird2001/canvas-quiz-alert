@@ -14,10 +14,12 @@ Enjoy the blaring Boeing 787 autopilot disconnect warning (changeable) when a qu
 ## Installation
 1. Clone the repository
 2. Install the required packages
+
     ```bash
     pip install -r requirements.txt
     ```
 3. Copy and update config.sample.yaml
+
     ```bash
     cp config.sample.yaml config.yaml
     ```
@@ -27,13 +29,16 @@ You can also change close_advance_min and open_advance_min to adjust the time be
 
 To change the alert sound, replace the default sound file (alert.mp3) with your own sound file. If the file name or format has changed, update the alert_sound_file field in config.yaml.
 **Keep the alert sound duration below 20s, else update rate will be reduced.**
+
 4. Run the setup script to retrieve and select which courses to check
+
     ```bash
     python get_course_id.py
     ```
 
 ## Usage
 1. Run the script
+
     ```bash
     python quiz_checker.py
     ```
