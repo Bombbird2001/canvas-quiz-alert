@@ -8,5 +8,5 @@ courses:
   name: <COURSE NAME>
 - id: <COURSE ID>
   name: <COURSE NAME>
-open_advance_min: 5
+open_advance_min: 2
 display_timezone: Asia/Singapore

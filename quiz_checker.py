@@ -1,12 +1,13 @@
-from dataclasses import dataclass
-from datetime import timedelta, datetime as dt
-from playsound3 import playsound
+import datetime
 import os
 import pytz
 import requests
 import schedule
 import time
 import yaml
+from dataclasses import dataclass
+from datetime import timedelta, datetime as dt
+from playsound3 import playsound
 
 
 with open("config.yaml", "r") as f:
@@ -43,11 +44,9 @@ class Quiz:
         return min(self.due, self.lock)
     
     def is_opening_soon(self, time_now):
-        # return True
-        return time_now + timedelta(minutes=open_advance_min) >= self.unlock > time_now
+        return time_now + timedelta(minutes=open_advance_min) >= self.unlock > time_now - timedelta(minutes=1)
 
     def is_closing_soon(self, time_now):
-        # return True
         end_time = self.get_end_time()
         return self.unlock <= time_now < end_time <= time_now + timedelta(minutes=close_advance_min)
 
@@ -79,6 +78,14 @@ def parse_quiz(quiz, course_name) -> Quiz:
     return Quiz(quiz_id, title, quiz_url, mobile_url, unlock, due, lock, course_name)
 
 
+true_start_time = dt.now(datetime.UTC)
+simulated_start_time = dt.now(datetime.UTC)
+
+
+def get_time_now():
+    return simulated_start_time + (dt.now(datetime.UTC) - true_start_time)
+
+
 def check_quizzes():
     all_quizzes = []
     for course in courses:
@@ -87,7 +94,7 @@ def check_quizzes():
         res = requests.get(url.format(course_id), headers=headers).json()
         for quiz_str in res:
             all_quizzes.append(parse_quiz(quiz_str, course_name))
-    time_now = pytz.utc.localize(dt.now())
+    time_now = get_time_now()
     opening = []
     opening_notif = False
     closing = []
