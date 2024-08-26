@@ -119,12 +119,12 @@ def check_quizzes():
         opening.sort(key=lambda x: x.unlock)
         print("The following quizzes are opening soon:")
         for quiz in opening:
-            print(f"{quiz.unlock.strftime("%Y-%m-%d %H:%M:%S")} | {quiz.course_name} - {quiz.title}: {quiz.url}")
+            print(f'{quiz.unlock.strftime("%Y-%m-%d %H:%M:%S")} | {quiz.course_name} - {quiz.title}: {quiz.url}')
     if closing_notif:
         closing.sort(key=lambda x: x.get_end_time())
         print("The following quizzes are closing soon:")
         for quiz in closing:
-            print(f"{quiz.get_end_time().strftime("%Y-%m-%d %H:%M:%S")} | {quiz.course_name} - {quiz.title}: {quiz.url}")
+            print(f'{quiz.get_end_time().strftime("%Y-%m-%d %H:%M:%S")} | {quiz.course_name} - {quiz.title}: {quiz.url}')
     if opening_notif or closing_notif:
         playsound(sound_file)
 
