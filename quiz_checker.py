@@ -44,7 +44,7 @@ class Quiz:
         return min(self.due, self.lock)
     
     def is_opening_soon(self, time_now):
-        return time_now + timedelta(minutes=open_advance_min) >= self.unlock > time_now - timedelta(minutes=1)
+        return time_now + timedelta(minutes=open_advance_min) >= self.unlock > time_now - timedelta(hours=1)
 
     def is_closing_soon(self, time_now):
         end_time = self.get_end_time()
