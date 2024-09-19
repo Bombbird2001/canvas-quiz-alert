@@ -19,7 +19,7 @@ open_advance_min = data["open_advance_min"]
 close_advance_min = data["close_advance_min"]
 display_tz = pytz.timezone(data["display_timezone"])
 sound_file = data["alert_sound_file"]
-url = canvas_link + "/api/v1/courses/{}/quizzes"
+url = canvas_link + "/api/v1/courses/{}/quizzes?page={}"
 headers = {
     'Authorization': f'Bearer {token}'
 }
@@ -44,7 +44,7 @@ class Quiz:
         return min(self.due, self.lock)
     
     def is_opening_soon(self, time_now):
-        return time_now + timedelta(minutes=open_advance_min) >= self.unlock > time_now - timedelta(hours=1)
+        return time_now + timedelta(minutes=open_advance_min) >= self.unlock > time_now - timedelta(hours=2)
 
     def is_closing_soon(self, time_now):
         end_time = self.get_end_time()
@@ -91,9 +91,14 @@ def check_quizzes():
     for course in courses:
         course_id = course["id"]
         course_name = course["name"]
-        res = requests.get(url.format(course_id), headers=headers).json()
-        for quiz_str in res:
-            all_quizzes.append(parse_quiz(quiz_str, course_name))
+        page_index = 0
+        while True:
+            page_index += 1
+            res = requests.get(url.format(course_id, page_index), headers=headers).json()
+            if len(res) == 0:
+                break
+            for quiz_str in res:
+                all_quizzes.append(parse_quiz(quiz_str, course_name))
     time_now = get_time_now()
     opening = []
     opening_notif = False
