@@ -8,6 +8,7 @@ import yaml
 from dataclasses import dataclass
 from datetime import timedelta, datetime as dt
 from playsound3 import playsound
+from typing import Dict, Any
 
 
 with open("config.yaml", "r") as f:
@@ -19,7 +20,8 @@ open_advance_min = data["open_advance_min"]
 close_advance_min = data["close_advance_min"]
 display_tz = pytz.timezone(data["display_timezone"])
 sound_file = data["alert_sound_file"]
-url = canvas_link + "/api/v1/courses/{}/quizzes?page={}"
+url = f"{canvas_link}/api/v1/courses/{{}}/quizzes?page={{}}"
+assignment_url = f"{canvas_link}/api/v1/courses/{{}}/assignments?page={{}}"
 headers = {
     'Authorization': f'Bearer {token}'
 }
@@ -34,7 +36,6 @@ class Quiz:
     id: int
     title: str
     url: str
-    mobile_url: str
     unlock: dt
     due: dt
     lock: dt
@@ -51,7 +52,7 @@ class Quiz:
         return self.unlock <= time_now < end_time <= time_now + timedelta(minutes=close_advance_min)
 
 
-def parse_quiz(quiz, course_name) -> Quiz:
+def parse_quiz(quiz: Dict[str, Any], course_name) -> Quiz:
     unlock = quiz["unlock_at"]
     if unlock is None:
         unlock = pytz.utc.localize(dt.min + timedelta(days=1))
@@ -72,10 +73,9 @@ def parse_quiz(quiz, course_name) -> Quiz:
     lock = lock.astimezone(display_tz)
     
     quiz_id = quiz["id"]
-    title = quiz["title"]
+    title = quiz.get("title", quiz.get("name", "No name"))
     quiz_url = quiz["html_url"]
-    mobile_url = quiz["mobile_url"]
-    return Quiz(quiz_id, title, quiz_url, mobile_url, unlock, due, lock, course_name)
+    return Quiz(quiz_id, title, quiz_url, unlock, due, lock, course_name)
 
 
 true_start_time = dt.now(datetime.UTC)
@@ -92,13 +92,26 @@ def check_quizzes():
         course_id = course["id"]
         course_name = course["name"]
         page_index = 0
+        # Quizzes
         while True:
             page_index += 1
             res = requests.get(url.format(course_id, page_index), headers=headers).json()
             if len(res) == 0:
                 break
-            for quiz_str in res:
-                all_quizzes.append(parse_quiz(quiz_str, course_name))
+            for quiz_json in res:
+                all_quizzes.append(parse_quiz(quiz_json, course_name))
+        page_index = 0
+        # Quizzes under assignments
+        while True:
+            page_index += 1
+            res = requests.get(assignment_url.format(course_id, page_index), headers=headers).json()
+            if len(res) == 0:
+                break
+            for quiz_json in res:
+                if (("is_quiz_assignment" not in quiz_json or not quiz_json["is_quiz_assignment"]) and
+                        ("is_quiz_lti_assignment" not in quiz_json or not quiz_json["is_quiz_lti_assignment"])):
+                    continue
+                all_quizzes.append(parse_quiz(quiz_json, course_name))
     time_now = get_time_now()
     opening = []
     opening_notif = False
